@@ -15,15 +15,12 @@
 # gem "pg"
 #
 default: &default
-  adapter: postgresql
-  encoding: unicode
-  # For details on connection pooling, see Rails configuration guide
-  # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
   <<: *default
-  database: life_changing_3books_development
+  adapter: sqlite3
+  database: db/development.sqlite3
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -57,7 +54,8 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: life_changing_3books_test
+  adapter: sqlite3
+  database: db/test.sqlite3
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -81,6 +79,8 @@ test:
 #
 production:
   <<: *default
+  adapter: postgresql
+  encoding: unicode
   database: life_changing_3books_production
   username: life_changing_3books
   password: <%= ENV["LIFE_CHANGING_3BOOKS_DATABASE_PASSWORD"] %>
