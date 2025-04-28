@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  submission: one
+  title: MyString
+  author: MyString
+  cover_url: MyString
+  book_order: 1
+
+two:
+  submission: two
+  title: MyString
+  author: MyString
+  cover_url: MyString
+  book_order: 1
