@@ -10,13 +10,7 @@ class CreateSubmissionBooks < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
+    # 同じsubmissionの中でbook_orderは一意
     add_index :submission_books, [:submission_id, :book_order], unique: true
-    
-    # book_orderは1から3までの値のみ許可
-    execute <<-SQL
-      ALTER TABLE submission_books
-      ADD CONSTRAINT check_book_order_range
-      CHECK (book_order BETWEEN 1 AND 3)
-    SQL
   end
 end

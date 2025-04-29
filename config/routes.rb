@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # トップページは新規投稿ページ
+  root "submissions#new"
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  resources :submissions, only: [:new, :create, :show] do
+    collection do
+      get 'search_books'
+    end
+  end
 end
