@@ -1,7 +1,7 @@
 <div class="max-w-4xl mx-auto px-4 py-8">
   <h1 class="text-3xl font-bold mb-8 text-center">私の人生を変えた3冊</h1>
 
-  <%= form_with(model: @submission, class: "space-y-8", data: { controller: "books" }) do |f| %>
+  <%= form_with(model: @submission, class: "space-y-8", local: true, data: { controller: "books", action: "submit->books#handleSubmit" }) do |f| %>
     <% if @submission.errors.any? %>
       <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
         <div class="text-red-700">
@@ -22,32 +22,37 @@
       </label>
       <div class="relative" data-books-target="searchContainer">
         <input type="text"
-               class="w-full p-4 border rounded-lg"
+               class="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                placeholder="タイトルや著者名で検索..."
                data-books-target="searchInput"
-               data-action="input->books#search">
-        <div class="absolute w-full bg-white mt-1 rounded-lg shadow-lg hidden"
+               data-action="input->books#search focus->books#showResults blur->books#hideResults">
+        <div class="absolute w-full bg-white mt-1 rounded-lg shadow-lg hidden max-h-96 overflow-y-auto z-50"
              data-books-target="searchResults">
         </div>
       </div>
     </div>
 
     <!-- 選択された本のリスト -->
-    <div class="space-y-4" data-books-target="selectedBooks">
+    <div class="space-y-6" data-books-target="selectedBooks">
       <%= f.fields_for :submission_books do |book_form| %>
-        <div class="border rounded-lg p-4 bg-gray-50">
+        <div class="relative border rounded-lg p-4 bg-white shadow-sm">
+          <!-- 順番を表示 -->
+          <div class="absolute -top-3 -left-3 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-sm">
+            <%= book_form.object.book_order %>
+          </div>
+          
           <div class="flex items-start gap-4">
-            <div class="w-24 h-32 bg-gray-200 flex items-center justify-center">
-              <img src="" class="max-w-full max-h-full hidden" data-books-target="coverImage">
-              <span class="text-gray-400">表紙</span>
+            <div class="w-24 h-32 bg-gray-100 flex items-center justify-center overflow-hidden rounded shadow-sm">
+              <img src="" class="w-full h-full object-cover hidden" data-books-target="coverImage">
+              <span class="text-gray-400 text-sm">本を選択</span>
             </div>
             <div class="flex-grow">
               <%= book_form.hidden_field :title %>
               <%= book_form.hidden_field :author %>
               <%= book_form.hidden_field :cover_url %>
               <%= book_form.hidden_field :book_order %>
-              <p class="font-bold mb-2" data-books-target="title">タイトルを選択してください</p>
-              <p class="text-gray-600" data-books-target="author"></p>
+              <p class="font-bold mb-2 text-lg" data-books-target="title">タイトルを選択してください</p>
+              <p class="text-gray-600 text-sm" data-books-target="author"></p>
             </div>
           </div>
         </div>
@@ -55,14 +60,18 @@
     </div>
 
     <!-- コメント入力 -->
-    <div class="mt-8">
+    <div class="mt-12">
       <%= f.label :comment, "一言コメント（任意）", class: "block text-gray-700 text-sm font-bold mb-2" %>
-      <%= f.text_area :comment, class: "w-full p-4 border rounded-lg", rows: 3, placeholder: "この本があなたの人生をどのように変えましたか？" %>
+      <%= f.text_area :comment,
+          class: "w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none",
+          rows: 3,
+          placeholder: "この3冊の本があなたの人生をどのように変えましたか？" %>
     </div>
 
     <!-- 投稿ボタン -->
-    <div class="text-center">
-      <%= f.submit "投稿する", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg" %>
+    <div class="text-center mt-12">
+      <%= f.submit "投稿する",
+          class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-lg shadow-sm transition duration-150 ease-in-out transform hover:scale-105" %>
     </div>
   <% end %>
 </div>

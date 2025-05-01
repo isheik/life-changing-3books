@@ -34,10 +34,20 @@ class SubmissionsController < ApplicationController
       
       # 必要な情報を抽出
       results = books.map do |book|
+        # GoogleBooks::Itemインスタンスから直接データを取得
+        info = book.instance_variable_get(:@volume_info)
+        
         {
           title: book.title,
-          author: book.authors,
-          cover_url: book.image_link(:thumbnail) || '',
+          author: book.authors || '著者不明',
+          cover_url: begin
+            links = info['imageLinks'] || {}
+            url = links['thumbnail'] || links['smallThumbnail']
+            url ? url.gsub('http://', 'https://') : ''
+          rescue => e
+            Rails.logger.error "Image URL extraction error: #{e.message}"
+            ''
+          end,
           description: book.description
         }
       end
