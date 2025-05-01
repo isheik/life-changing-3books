@@ -100,6 +100,7 @@ GEM
       reline (>= 0.3.8)
     drb (2.2.1)
     erubi (1.13.1)
+    foreman (0.88.1)
     globalid (1.2.1)
       activesupport (>= 6.1)
     googlebooks (0.0.9)
@@ -258,6 +259,7 @@ DEPENDENCIES
   bootsnap
   capybara
   debug
+  foreman
   googlebooks (~> 0.0.9)
   importmap-rails
   jbuilder

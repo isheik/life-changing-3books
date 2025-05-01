@@ -3,7 +3,9 @@ class SubmissionsController < ApplicationController
 
   def new
     @submission = Submission.new
-    3.times { @submission.submission_books.build }
+    3.times do |i|
+      @submission.submission_books.build(book_order: i + 1)
+    end
   end
 
   def create
@@ -23,8 +25,28 @@ class SubmissionsController < ApplicationController
   end
 
   def search_books
-    # Google Books APIの実装は後ほど追加
-    render json: { books: [] }
+    query = params[:query]
+    return render json: { books: [] } if query.blank?
+
+    begin
+      # Google Books APIで検索を実行
+      books = GoogleBooks.search(query, { country: 'JP', count: 5 })
+      
+      # 必要な情報を抽出
+      results = books.map do |book|
+        {
+          title: book.title,
+          author: book.authors,
+          cover_url: book.image_link(:thumbnail) || '',
+          description: book.description
+        }
+      end
+
+      render json: { books: results }
+    rescue => e
+      Rails.logger.error "Google Books API error: #{e.message}"
+      render json: { error: '検索中にエラーが発生しました', books: [] }, status: :service_unavailable
+    end
   end
 
   private

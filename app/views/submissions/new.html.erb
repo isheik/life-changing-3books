@@ -1,4 +1,68 @@
-<div>
-  <h1 class="font-bold text-4xl">Submissions#new</h1>
-  <p>Find me in app/views/submissions/new.html.erb</p>
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-8 text-center">私の人生を変えた3冊</h1>
+
+  <%= form_with(model: @submission, class: "space-y-8", data: { controller: "books" }) do |f| %>
+    <% if @submission.errors.any? %>
+      <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+        <div class="text-red-700">
+          <h2><%= pluralize(@submission.errors.count, "error") %> 投稿できませんでした:</h2>
+          <ul class="list-disc list-inside">
+            <% @submission.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- 本の検索フィールド -->
+    <div class="mb-8">
+      <label class="block text-gray-700 text-sm font-bold mb-2">
+        本を検索
+      </label>
+      <div class="relative" data-books-target="searchContainer">
+        <input type="text"
+               class="w-full p-4 border rounded-lg"
+               placeholder="タイトルや著者名で検索..."
+               data-books-target="searchInput"
+               data-action="input->books#search">
+        <div class="absolute w-full bg-white mt-1 rounded-lg shadow-lg hidden"
+             data-books-target="searchResults">
+        </div>
+      </div>
+    </div>
+
+    <!-- 選択された本のリスト -->
+    <div class="space-y-4" data-books-target="selectedBooks">
+      <%= f.fields_for :submission_books do |book_form| %>
+        <div class="border rounded-lg p-4 bg-gray-50">
+          <div class="flex items-start gap-4">
+            <div class="w-24 h-32 bg-gray-200 flex items-center justify-center">
+              <img src="" class="max-w-full max-h-full hidden" data-books-target="coverImage">
+              <span class="text-gray-400">表紙</span>
+            </div>
+            <div class="flex-grow">
+              <%= book_form.hidden_field :title %>
+              <%= book_form.hidden_field :author %>
+              <%= book_form.hidden_field :cover_url %>
+              <%= book_form.hidden_field :book_order %>
+              <p class="font-bold mb-2" data-books-target="title">タイトルを選択してください</p>
+              <p class="text-gray-600" data-books-target="author"></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- コメント入力 -->
+    <div class="mt-8">
+      <%= f.label :comment, "一言コメント（任意）", class: "block text-gray-700 text-sm font-bold mb-2" %>
+      <%= f.text_area :comment, class: "w-full p-4 border rounded-lg", rows: 3, placeholder: "この本があなたの人生をどのように変えましたか？" %>
+    </div>
+
+    <!-- 投稿ボタン -->
+    <div class="text-center">
+      <%= f.submit "投稿する", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg" %>
+    </div>
+  <% end %>
 </div>
