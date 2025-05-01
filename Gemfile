@@ -33,6 +33,9 @@ gem "tailwindcss-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
+# Google Books API client
+gem 'googlebooks', '~> 0.0.9'
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
 
