@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { useMutation } from "stimulus-use";
 
 // 本の検索と選択を管理するコントローラー
 export default class extends Controller {
@@ -18,6 +19,18 @@ export default class extends Controller {
         this.hideResults();
       }
     });
+
+    this.element.addEventListener("click", (e) => {
+      const target = e.target.closest(
+        "[data-action='click->books#selectBook']"
+      );
+      if (target) this.selectBook({ currentTarget: target });
+    });
+
+    // useMutation(this, {
+    //   element: this.searchResultsTarget, // ✅ 監視対象を指定
+    //   childList: true, // ✅ 子要素の変化を監視
+    // });
   }
 
   // 検索結果を表示
@@ -100,6 +113,8 @@ export default class extends Controller {
 
   // 本を選択した時の処理
   selectBook(event) {
+    console.log("aaaaa");
+
     const activeIndex = this.getActiveBookIndex();
     console.log("Active index:", activeIndex);
     console.log(
