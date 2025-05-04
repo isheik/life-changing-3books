@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus";
-import { useMutation } from "stimulus-use";
 
 // 本の検索と選択を管理するコントローラー
 export default class extends Controller {
@@ -19,18 +18,6 @@ export default class extends Controller {
         this.hideResults();
       }
     });
-
-    this.element.addEventListener("click", (e) => {
-      const target = e.target.closest(
-        "[data-action='click->books#selectBook']"
-      );
-      if (target) this.selectBook({ currentTarget: target });
-    });
-
-    // useMutation(this, {
-    //   element: this.searchResultsTarget, // ✅ 監視対象を指定
-    //   childList: true, // ✅ 子要素の変化を監視
-    // });
   }
 
   // 検索結果を表示
@@ -113,21 +100,8 @@ export default class extends Controller {
 
   // 本を選択した時の処理
   selectBook(event) {
-    console.log("aaaaa");
-
     const activeIndex = this.getActiveBookIndex();
-    console.log("Active index:", activeIndex);
-    console.log(
-      "Current title targets:",
-      this.titleTargets.map((el) => el.textContent)
-    );
-
-    if (activeIndex === -1) {
-      console.log("No empty slot available");
-      return;
-    }
-
-    console.log("Selected book data:", event.currentTarget.dataset);
+    if (activeIndex === -1) return;
 
     const bookData = event.currentTarget.dataset;
     const titleElements = this.titleTargets;
@@ -137,72 +111,37 @@ export default class extends Controller {
 
     // フォームフィールドとプレビューを更新
     titleElements[activeIndex].textContent = bookData.bookTitle;
-    authorElements[activeIndex].textContent = bookData.bookAuthor || "著者不明";
+    authorElements[activeIndex].textContent = bookData.bookAuthor;
 
     const coverImage = coverElements[activeIndex];
     const coverContainer = coverImage.parentElement;
-    const placeholderText = coverContainer.querySelector("span");
 
     if (bookData.bookCover) {
+      // 画像を設定
       coverImage.src = bookData.bookCover;
       coverImage.classList.remove("hidden");
-      placeholderText?.classList.add("hidden");
-
-      // エラー時の処理を追加
-      coverImage.onerror = () => {
-        coverImage.classList.add("hidden");
-        placeholderText?.classList.remove("hidden");
-      };
+      // プレースホルダーテキストを非表示
+      coverContainer.querySelector("span")?.classList.add("hidden");
     }
 
     // hidden フィールドを更新
     const prefix = `submission[submission_books_attributes][${activeIndex}]`;
-
-    // フォームフィールドの取得
-    const titleField = form.querySelector(`input[name="${prefix}[title]"]`);
-    const authorField = form.querySelector(`input[name="${prefix}[author]"]`);
-    const coverUrlField = form.querySelector(
-      `input[name="${prefix}[cover_url]"]`
-    );
-    const bookOrderField = form.querySelector(
-      `input[name="${prefix}[book_order]"]`
-    );
-
-    console.log("Form fields found:", {
-      title: titleField !== null,
-      author: authorField !== null,
-      coverUrl: coverUrlField !== null,
-      bookOrder: bookOrderField !== null,
-    });
-
-    // フィールドの値を設定
-    titleField.value = bookData.bookTitle;
-    authorField.value = bookData.bookAuthor || "著者不明";
-    coverUrlField.value = bookData.bookCover || "";
-
-    console.log("Updated form values:", {
-      title: titleField.value,
-      author: authorField.value,
-      coverUrl: coverUrlField.value,
-      bookOrder: bookOrderField.value,
-    });
+    form.querySelector(`input[name="${prefix}[title]"]`).value =
+      bookData.bookTitle;
+    form.querySelector(`input[name="${prefix}[author]"]`).value =
+      bookData.bookAuthor;
+    form.querySelector(`input[name="${prefix}[cover_url]"]`).value =
+      bookData.bookCover;
 
     // 検索フィールドをクリアし、結果を非表示
     this.searchInputTarget.value = "";
     this.searchResultsTarget.innerHTML = "";
-    this.hideResults();
+    this.searchResultsTarget.classList.add("hidden");
     this.searchInputTarget.blur();
   }
 
   // 現在アクティブな（未選択の）本のインデックスを取得
   getActiveBookIndex() {
-    const selectedCount = this.titleTargets.reduce((count, el) => {
-      return (
-        count + (el.textContent.trim() === "タイトルを選択してください" ? 0 : 1)
-      );
-    }, 0);
-
-    // 1番目から順に埋めていく
     return this.titleTargets.findIndex(
       (el) => el.textContent.trim() === "タイトルを選択してください"
     );

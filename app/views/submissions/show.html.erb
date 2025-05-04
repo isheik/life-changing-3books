@@ -2,33 +2,22 @@
   <h1 class="text-3xl font-bold mb-8 text-center">私の人生を変えた3冊</h1>
 
   <% if @submission.comment.present? %>
-    <div class="bg-blue-50 rounded-lg p-8 mb-12 shadow-sm">
-      <h2 class="text-xl font-bold mb-4 text-blue-900">コメント</h2>
-      <p class="text-gray-700 leading-relaxed"><%= simple_format(@submission.comment) %></p>
+    <div class="bg-gray-50 rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-bold mb-4">コメント</h2>
+      <p class="text-gray-700"><%= @submission.comment %></p>
     </div>
   <% end %>
 
   <div class="grid md:grid-cols-3 gap-8">
-    <% @submission.submission_books.order(:book_order).each do |book| %>
-      <div class="relative border rounded-lg p-4 bg-white shadow-sm transform transition hover:shadow-md duration-150">
-        <!-- 順番を表示 -->
-        <div class="absolute -top-3 -left-3 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-sm">
-          <%= book.book_order %>
+    <% @submission.submission_books.each do |book| %>
+      <div class="border rounded-lg p-4 bg-white shadow-sm">
+        <div class="aspect-w-2 aspect-h-3 mb-4">
+          <%= image_tag book.cover_url.presence || '/placeholder-book.png',
+                        class: "object-cover rounded w-full h-full",
+                        alt: book.title %>
         </div>
-
-        <div class="aspect-w-2 aspect-h-3 mb-4 bg-gray-100 rounded overflow-hidden">
-          <% if book.cover_url.present? %>
-            <%= image_tag book.cover_url,
-                         class: "object-cover w-full h-full hover:opacity-90 transition duration-150",
-                         alt: book.title %>
-          <% else %>
-            <div class="w-full h-full flex items-center justify-center">
-              <span class="text-gray-400 text-sm">表紙なし</span>
-            </div>
-          <% end %>
-        </div>
-        <h3 class="font-bold text-lg mb-2 line-clamp-2"><%= book.title %></h3>
-        <p class="text-gray-600 text-sm"><%= book.author %></p>
+        <h3 class="font-bold mb-2"><%= book.title %></h3>
+        <p class="text-gray-600"><%= book.author %></p>
       </div>
     <% end %>
   </div>
