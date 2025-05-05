@@ -29,12 +29,18 @@ export default class extends Controller {
 
   // 検索結果を表示
   showResults() {
-    this.searchResultsTarget.classList.remove("hidden");
+    if (this.searchResultsTarget.innerHTML.trim() !== "") {
+      this.searchResultsTarget.classList.remove("hidden");
+    }
   }
 
   // 検索結果を非表示
   hideResults() {
     this.searchResultsTarget.classList.add("hidden");
+    // フォーカスが外れた後に内容をクリア
+    setTimeout(() => {
+      this.searchResultsTarget.innerHTML = "";
+    }, 200);
   }
 
   // 検索入力時の処理
@@ -44,7 +50,7 @@ export default class extends Controller {
       const query = this.searchInputTarget.value.trim();
       if (query.length < 2) {
         this.searchResultsTarget.innerHTML = "";
-        // this.hideResults();
+        this.hideResults();
         return;
       }
 
@@ -68,7 +74,7 @@ export default class extends Controller {
           data.books
         );
       }
-      // this.showResults();
+      this.showResults();
     } catch (error) {
       console.error("Search failed:", error);
       this.searchResultsTarget.innerHTML =
@@ -107,7 +113,9 @@ export default class extends Controller {
 
   // 本を選択した時の処理
   selectBook(event) {
-    console.log("selectBook");
+    // イベントの伝播を止める
+    event.preventDefault();
+    event.stopPropagation();
 
     const activeIndex = this.getActiveBookIndex();
     if (activeIndex === -1) return;
@@ -116,7 +124,13 @@ export default class extends Controller {
     const titleElements = this.titleTargets;
     const authorElements = this.authorTargets;
     const coverElements = this.coverImageTargets;
-    const form = this.element.querySelector("form");
+
+    // フォームを探す（最も近い祖先のform要素）
+    const form = event.target.closest("form");
+    if (!form) {
+      console.error("Form not found");
+      return;
+    }
 
     // フォームフィールドとプレビューを更新
     titleElements[activeIndex].textContent = bookData.bookTitle;
@@ -125,12 +139,19 @@ export default class extends Controller {
     const coverImage = coverElements[activeIndex];
     const coverContainer = coverImage.parentElement;
 
+    // プレースホルダーと画像の表示を制御
+    const placeholder = coverContainer.querySelector("span");
     if (bookData.bookCover) {
-      // 画像を設定
       coverImage.src = bookData.bookCover;
       coverImage.classList.remove("hidden");
-      // プレースホルダーテキストを非表示
-      coverContainer.querySelector("span")?.classList.add("hidden");
+      if (placeholder) {
+        placeholder.classList.add("hidden");
+      }
+    } else {
+      coverImage.classList.add("hidden");
+      if (placeholder) {
+        placeholder.classList.remove("hidden");
+      }
     }
 
     // hidden フィールドを更新
@@ -142,11 +163,16 @@ export default class extends Controller {
     form.querySelector(`input[name="${prefix}[cover_url]"]`).value =
       bookData.bookCover;
 
-    // 検索フィールドをクリアし、結果を非表示
+    // 検索フィールドをクリアして結果を非表示
     this.searchInputTarget.value = "";
     this.searchResultsTarget.innerHTML = "";
-    this.searchResultsTarget.classList.add("hidden");
-    this.searchInputTarget.blur();
+    this.hideResults();
+
+    // 少し遅延させてからフォーカスを設定（UIの更新が完了してから）
+    setTimeout(() => {
+      this.searchInputTarget.focus();
+      this.searchInputTarget.select(); // テキストを選択状態に
+    }, 100);
   }
 
   // 現在アクティブな（未選択の）本のインデックスを取得
