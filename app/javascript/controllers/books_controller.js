@@ -14,9 +14,16 @@ export default class extends Controller {
   connect() {
     // 検索結果の外側をクリックしたら閉じる
     document.addEventListener("click", (e) => {
-      if (!this.element.contains(e.target)) {
+      const searchContainer = this.searchResultsTarget.parentElement;
+      // クリックされた要素が検索コンテナの外側の場合のみ非表示
+      if (!searchContainer.contains(e.target)) {
         this.hideResults();
       }
+    });
+
+    // 検索結果内のクリックイベントは親要素に伝播させない
+    this.searchResultsTarget.addEventListener("click", (e) => {
+      e.stopPropagation();
     });
   }
 
@@ -37,7 +44,7 @@ export default class extends Controller {
       const query = this.searchInputTarget.value.trim();
       if (query.length < 2) {
         this.searchResultsTarget.innerHTML = "";
-        this.hideResults();
+        // this.hideResults();
         return;
       }
 
@@ -61,7 +68,7 @@ export default class extends Controller {
           data.books
         );
       }
-      this.showResults();
+      // this.showResults();
     } catch (error) {
       console.error("Search failed:", error);
       this.searchResultsTarget.innerHTML =
@@ -100,6 +107,8 @@ export default class extends Controller {
 
   // 本を選択した時の処理
   selectBook(event) {
+    console.log("selectBook");
+
     const activeIndex = this.getActiveBookIndex();
     if (activeIndex === -1) return;
 
