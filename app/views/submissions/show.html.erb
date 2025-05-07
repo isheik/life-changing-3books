@@ -1,46 +1,70 @@
-<div class="max-w-4xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-8 text-center">私の人生を変えた3冊</h1>
-
-  <% if @submission.comment.present? %>
-    <div class="bg-gray-50 rounded-lg p-6 mb-8">
-      <h2 class="text-xl font-bold mb-4">コメント</h2>
-      <p class="text-gray-700"><%= @submission.comment %></p>
-    </div>
-  <% end %>
-
-  <div class="grid md:grid-cols-3 gap-8">
-    <% @submission.submission_books.each do |book| %>
-      <div class="border rounded-lg p-4 bg-white shadow-sm">
-        <div class="aspect-w-2 aspect-h-3 mb-4">
-          <%= image_tag book.cover_url.presence || '/placeholder-book.png',
-                        class: "object-cover rounded w-full h-full",
-                        alt: book.title %>
-        </div>
-        <h3 class="font-bold mb-2"><%= book.title %></h3>
-        <p class="text-gray-600"><%= book.author %></p>
+<div class="min-h-screen bg-gray-50 py-12">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <!-- ヘッダー部分 -->
+      <div class="relative bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-12 text-white">
+        <h1 class="text-4xl font-bold text-center mb-4">私の人生を変えた3冊</h1>
+        <% if @submission.comment.present? %>
+          <p class="text-lg text-center max-w-2xl mx-auto italic">
+            "<%= @submission.comment %>"
+          </p>
+        <% end %>
       </div>
-    <% end %>
-  </div>
 
-  <div class="mt-12 text-center space-y-4">
-    <!-- SNSシェアボタン -->
-    <div class="flex justify-center space-x-4">
-      <% share_text = "私の人生を変えた3冊 #3books-changed-me" %>
-      <% share_url = submission_url(@submission) %>
-      
-      <%= link_to "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}",
-          target: "_blank",
-          class: "bg-[#1DA1F2] text-white px-6 py-2 rounded-full inline-flex items-center hover:bg-[#1a90da]" do %>
-        X（Twitter）でシェア
-      <% end %>
+      <!-- 本のグリッド -->
+      <div class="p-8">
+        <div class="grid md:grid-cols-3 gap-8">
+          <% @submission.submission_books.order(:book_order).each do |book| %>
+            <div class="relative">
+              <!-- 順番を表示 -->
+              <div class="absolute -top-3 -left-3 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-sm z-10">
+                <%= book.book_order %>
+              </div>
+              
+              <div class="bg-white rounded-lg shadow-sm overflow-hidden border">
+                <div class="aspect-w-2 aspect-h-3">
+                  <% if book.cover_url.present? %>
+                    <%= image_tag book.cover_url,
+                        class: "w-full h-full object-cover",
+                        alt: book.title %>
+                  <% else %>
+                    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <span class="text-gray-400">表紙なし</span>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="p-4">
+                  <h3 class="font-bold text-lg mb-1 line-clamp-2"><%= book.title %></h3>
+                  <p class="text-gray-600 text-sm"><%= book.author %></p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
 
-      <%= link_to "https://www.facebook.com/sharer/sharer.php?u=#{CGI.escape(share_url)}",
-          target: "_blank",
-          class: "bg-[#4267B2] text-white px-6 py-2 rounded-full inline-flex items-center hover:bg-[#365899]" do %>
-        Facebookでシェア
-      <% end %>
+      <!-- シェアボタン -->
+      <div class="bg-gray-50 px-8 py-6 border-t">
+        <div class="flex flex-col items-center space-y-4">
+          <div class="flex space-x-4">
+            <% share_text = "私の人生を変えた3冊を共有しました！ #3books_changed_me" %>
+            <% share_url = submission_url(@submission) %>
+            
+            <%= link_to "https://twitter.com/intent/tweet?text=#{CGI.escape(share_text)}&url=#{CGI.escape(share_url)}",
+                target: "_blank",
+                class: "bg-[#1DA1F2] text-white px-8 py-3 rounded-full inline-flex items-center hover:bg-[#1a90da] transition duration-150 ease-in-out transform hover:scale-105 shadow-sm" do %>
+              <svg class="w-5 h-5 mr-2 fill-current" viewBox="0 0 24 24">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+              シェア
+            <% end %>
+          </div>
+
+          <%= link_to "新しい投稿を作成", root_path,
+              class: "text-blue-600 hover:text-blue-800 inline-block font-medium
+                     transform transition hover:scale-105 duration-150" %>
+        </div>
+      </div>
     </div>
-
-    <%= link_to "新しい投稿を作成", root_path, class: "text-blue-600 hover:text-blue-800 inline-block" %>
   </div>
 </div>
