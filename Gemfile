@@ -36,6 +36,9 @@ gem "jbuilder"
 # Google Books API client
 gem 'googlebooks', '~> 0.0.9'
 
+# Image processing
+gem 'mini_magick', '~> 4.12'
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
 
