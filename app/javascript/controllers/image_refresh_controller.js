@@ -28,7 +28,18 @@ export default class extends Controller {
   }
 
   refresh() {
-    // ページ全体をリフレッシュ
-    Turbo.visit(window.location.href, { action: "replace" });
+    // 画像状態のみを更新（Turbo Frameを使用）
+    const submissionId = window.location.pathname.split("/").pop();
+    // GETリクエストを送信すると、Turbo Frameが自動的に更新される
+    fetch(`/submissions/${submissionId}/image_status`).then((response) => {
+      if (response.ok) {
+        response.text().then((html) => {
+          // 画像が生成されていた場合は自動更新を停止
+          if (html.includes("image_tag")) {
+            this.stopRefreshing();
+          }
+        });
+      }
+    });
   }
 }

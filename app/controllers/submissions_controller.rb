@@ -35,20 +35,7 @@ class SubmissionsController < ApplicationController
   # 画像生成状態を確認するエンドポイント
   def image_status
     @submission = Submission.find_by!(uuid: params[:id])
-    respond_to do |format|
-      format.turbo_stream do
-        if @submission.generated_image_path.present?
-          render turbo_stream: turbo_stream.update("submission_image",
-            partial: "submissions/image_content",
-            locals: { submission: @submission }
-          )
-        else
-          render turbo_stream: turbo_stream.update("submission_image",
-            partial: "submissions/loading_content"
-          )
-        end
-      end
-    end
+    render partial: 'submissions/image_frame', locals: { submission: @submission }
   end
 
   def search_books

@@ -1,0 +1,5 @@
+<% if submission.generated_image_path.present? %>
+  <%= render "image_content", submission: submission %>
+<% else %>
+  <%= render "loading_content" %>
+<% end %>
