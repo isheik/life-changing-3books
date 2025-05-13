@@ -12,6 +12,14 @@ class SubmissionsController < ApplicationController
     @submission = Submission.new(submission_params)
     
     if @submission.save
+      # 画像生成を実行
+      begin
+        ImageGeneratorService.generate(@submission)
+      rescue => e
+        Rails.logger.error "Image generation failed: #{e.message}"
+        # 画像生成に失敗しても投稿自体は成功とする
+      end
+      
       redirect_to submission_path(@submission), notice: '投稿が完了しました'
     else
       # バリデーションエラー時は入力フォームを再表示
