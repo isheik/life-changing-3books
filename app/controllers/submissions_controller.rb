@@ -20,7 +20,7 @@ class SubmissionsController < ApplicationController
         # 画像生成に失敗しても投稿自体は成功とする
       end
       
-      redirect_to submission_path(@submission), notice: '投稿が完了しました'
+      redirect_to submission_path(@submission.uuid), notice: '投稿が完了しました'
     else
       # バリデーションエラー時は入力フォームを再表示
       flash.now[:alert] = '投稿に失敗しました。入力内容を確認してください。'
