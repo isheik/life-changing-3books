@@ -22,8 +22,20 @@ class ImageGeneratorService
 
     begin
       logger.info "Starting image generation for submission #{submission.uuid}"
-      # Create a blank canvas with a white background
-      canvas = MiniMagick::Image.create("1200x630", "xc:white") { |i| i.format "png" }
+      # Create a blank canvas with a white background using direct convert command
+      canvas = MiniMagick::Tool::Convert.new do |convert|
+        convert << "-size" << "1200x630"
+        convert << "xc:white"
+        convert << "PNG:-"
+      end
+  
+      begin
+        canvas = MiniMagick::Image.read(canvas.call)
+        logger.info "Successfully created blank canvas"
+      rescue => e
+        logger.error "Failed to create blank canvas: #{e.message}"
+        raise e
+      end
 
       logger.info "Processing book covers for submission #{submission.uuid}"
       submission.submission_books.order(:book_order).map.with_index do |book, index|
@@ -53,11 +65,21 @@ class ImageGeneratorService
           logger.error "Failed to process book #{index + 1}: #{e.message}"
           logger.error e.backtrace.join("\n")
           # Create a placeholder for failed covers
-          placeholder = MiniMagick::Image.create("300x450", "xc:lightgray") do |i|
-            i.format "png"
-            i.gravity "center"
-            i.pointsize "24"
-            i.draw "text 0,0 'No Image'"
+          placeholder_convert = MiniMagick::Tool::Convert.new do |convert|
+            convert << "-size" << "300x450"
+            convert << "xc:lightgray"
+            convert << "-gravity" << "center"
+            convert << "-pointsize" << "24"
+            convert << "-draw" << "text 0,0 'No Image'"
+            convert << "PNG:-"
+          end
+
+          begin
+            placeholder = MiniMagick::Image.read(placeholder_convert.call)
+            logger.info "Successfully created placeholder image for book #{index + 1}"
+          rescue => e
+            logger.error "Failed to create placeholder for book #{index + 1}: #{e.message}"
+            raise e
           end
 
           canvas = canvas.composite(placeholder) do |c|
@@ -68,19 +90,30 @@ class ImageGeneratorService
       end
 
       # Add hashtag
-      caption = MiniMagick::Image.create("600x100", "xc:transparent") do |i|
-        i.format "png"
-        i.gravity "center"
-        i.pointsize "36"
-        i.font "Arial"
-        i.fill "#333333"
-        i.draw "text 0,0 '#3books-changed-me'"
+      caption_convert = MiniMagick::Tool::Convert.new do |convert|
+        convert << "-size" << "600x100"
+        convert << "xc:transparent"
+        convert << "-gravity" << "center"
+        convert << "-pointsize" << "36"
+        convert << "-font" << "Arial"
+        convert << "-fill" << "#333333"
+        convert << "-draw" << "text 0,0 '#3books-changed-me'"
+        convert << "PNG:-"
       end
 
-      canvas = canvas.composite(caption) do |c|
-        c.compose "Over"
-        c.gravity "south"
-        c.geometry "+0+50"
+      begin
+        caption = MiniMagick::Image.read(caption_convert.call)
+        logger.info "Successfully created hashtag caption"
+        
+        canvas = canvas.composite(caption) do |c|
+          c.compose "Over"
+          c.gravity "south"
+          c.geometry "+0+50"
+        end
+        logger.info "Successfully added hashtag to canvas"
+      rescue => e
+        logger.error "Failed to create or add hashtag: #{e.message}"
+        raise e
       end
 
       # Save the final image
